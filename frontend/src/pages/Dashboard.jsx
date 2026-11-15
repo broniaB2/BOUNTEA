@@ -77,6 +77,8 @@ function Dashboard({
   onCategoryChange,
   onCreateBounty,
 }) {
+  const claimedBounties = bounties.filter((bounty) => bounty.claimedBy === "Precious");
+
   return (
     <div className="page-content">
       <div className="welcome-row">
@@ -106,7 +108,9 @@ function Dashboard({
           icon={BriefcaseBusiness}
           tone="blue"
           label="Active tasks"
-          value="0"
+          value={claimedBounties.filter(
+            (bounty) => bounty.status === "IN_PROGRESS",
+          ).length}
           description="Your ongoing work"
         />
         <StatCard
@@ -120,7 +124,9 @@ function Dashboard({
           icon={CheckCircle2}
           tone="orange"
           label="Completed tasks"
-          value="0"
+          value={claimedBounties.filter(
+            (bounty) => bounty.status === "COMPLETED",
+          ).length}
           description="Successfully completed"
         />
       </section>

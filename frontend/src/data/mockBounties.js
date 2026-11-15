@@ -9,6 +9,7 @@ export const initialBounties = [
     deadline: "2 days",
     skills: ["Luganda", "Translation", "Writing"],
     business: "Kampala Fashion Hub",
+    network: "Stellar Testnet",
     status: "OPEN",
   },
   {
@@ -21,6 +22,7 @@ export const initialBounties = [
     deadline: "3 days",
     skills: ["Excel", "Data Entry"],
     business: "Mirembe Stores",
+    network: "Stellar Testnet",
     status: "OPEN",
   },
   {
@@ -33,6 +35,7 @@ export const initialBounties = [
     deadline: "5 days",
     skills: ["Research", "Analysis"],
     business: "Glow Beauty Uganda",
+    network: "Stellar Testnet",
     status: "OPEN",
   },
   {
@@ -44,6 +47,7 @@ export const initialBounties = [
     deadline: "2 days",
     skills: ["Writing", "Social Media"],
     business: "Her Essentials",
+    network: "Stellar Testnet",
     status: "OPEN",
   },
 ];

@@ -1,11 +1,24 @@
 import { ArrowUpRight, Clock3 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function BountyCard({ bounty }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const statusLabel = bounty.status.replace(/_/g, " ");
+
+  function openDetails() {
+    navigate(`/marketplace/${bounty.id}`, {
+      state: { from: location.pathname },
+    });
+  }
+
   return (
     <article className="bounty-card">
       <div className="bounty-card-top">
         <span className="category-tag">{bounty.category}</span>
-        <span className="status-tag">{bounty.status}</span>
+        <span className={`status-tag status-${bounty.status.toLowerCase()}`}>
+          {statusLabel}
+        </span>
       </div>
       <h3>{bounty.title}</h3>
       <p className="bounty-description">{bounty.description}</p>
@@ -30,11 +43,7 @@ function BountyCard({ bounty }) {
       </div>
       <button
         className="view-button"
-        onClick={() =>
-          alert(
-            `You selected: ${bounty.title}\n\nTask details and claiming will be implemented in the next stage.`,
-          )
-        }
+        onClick={openDetails}
       >
         View bounty <ArrowUpRight size={16} />
       </button>
