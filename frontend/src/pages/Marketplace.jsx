@@ -83,6 +83,7 @@ function Marketplace({
   onSearchChange,
   onCategoryChange,
   onCreateBounty,
+  user,
 }) {
   return (
     <div className="page-content">
@@ -95,10 +96,12 @@ function Marketplace({
             autonomous payments on Stellar.
           </p>
         </div>
-        <button className="primary-button" onClick={onCreateBounty}>
-          <Plus size={18} />
-          Create bounty
-        </button>
+        {user?.role === "business" && (
+          <button className="primary-button" onClick={onCreateBounty}>
+            <Plus size={18} />
+            Create bounty
+          </button>
+        )}
       </div>
       <BountyExplorer
         bounties={filteredBounties}

@@ -22,13 +22,14 @@ export function filterBounties(bounties, search, category) {
   });
 }
 
-export function createMockBounty(form) {
+export function createMockBounty(form, user) {
   return {
     id: Date.now(),
     ...form,
     reward: Number(form.reward),
     skills: [form.category],
-    business: "Your Business",
+    business: user?.name || "Your Business",
+    createdBy: user?.email,
     network: "Stellar Testnet",
     status: "OPEN",
   };

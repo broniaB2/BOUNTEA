@@ -100,6 +100,7 @@ function SubmissionForm({ task, form, isRevision, onChange, onSubmit, onCancel }
 function MyTasks({
   bounties,
   submissions,
+  worker,
   onStartTask,
   onSubmitWork,
   onResubmitWork,
@@ -110,7 +111,10 @@ function MyTasks({
   const [submissionForm, setSubmissionForm] = useState(emptySubmission);
   const [notice, setNotice] = useState("");
 
-  const claimedTasks = useMemo(() => getClaimedBounties(bounties), [bounties]);
+  const claimedTasks = useMemo(
+    () => getClaimedBounties(bounties, worker),
+    [bounties, worker],
+  );
   const visibleTasks = claimedTasks.filter(
     (task) => activeFilter === "ALL" || task.status === activeFilter,
   );

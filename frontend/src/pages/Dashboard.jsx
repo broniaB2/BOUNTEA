@@ -76,8 +76,16 @@ function Dashboard({
   onSearchChange,
   onCategoryChange,
   onCreateBounty,
+  user,
+  showBusinessActions,
 }) {
-  const claimedBounties = bounties.filter((bounty) => bounty.claimedBy === "Precious");
+  const isBusiness = user?.role === "business";
+  const visibleBounties = isBusiness
+    ? bounties.filter((bounty) => bounty.createdBy === user.email)
+    : bounties;
+  const claimedBounties = bounties.filter(
+    (bounty) => bounty.claimedBy === user?.name,
+  );
 
   return (
     <div className="page-content">
@@ -90,10 +98,12 @@ function Dashboard({
             autonomous payments on Stellar.
           </p>
         </div>
-        <button className="primary-button" onClick={onCreateBounty}>
-          <Plus size={18} />
-          Create bounty
-        </button>
+        {showBusinessActions && (
+          <button className="primary-button" onClick={onCreateBounty}>
+            <Plus size={18} />
+            Create bounty
+          </button>
+        )}
       </div>
 
       <section className="stats-grid">
@@ -101,7 +111,7 @@ function Dashboard({
           icon={Compass}
           tone="purple"
           label="Available bounties"
-          value={bounties.length}
+          value={visibleBounties.length}
           description="Opportunities to explore"
         />
         <StatCard
@@ -131,9 +141,13 @@ function Dashboard({
         />
       </section>
 
-      <HeroBanner onCreateBounty={onCreateBounty} />
+      {showBusinessActions && <HeroBanner onCreateBounty={onCreateBounty} />}
       <BountyExplorer
-        bounties={filteredBounties}
+        bounties={
+          isBusiness
+            ? filteredBounties.filter((bounty) => bounty.createdBy === user.email)
+            : filteredBounties
+        }
         search={search}
         category={category}
         categories={categories}

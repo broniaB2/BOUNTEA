@@ -157,21 +157,32 @@ function SubmissionDetails({
 function Submissions({
   bounties,
   submissions,
+  user,
   onApproveSubmission,
   onRequestRevision,
 }) {
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [selectedId, setSelectedId] = useState(null);
   const [notice, setNotice] = useState("");
+  const ownedBountyIds = new Set(
+    bounties
+      .filter((bounty) => bounty.createdBy === user?.email)
+      .map((bounty) => String(bounty.id)),
+  );
+  const scopedSubmissions = submissions.filter((submission) =>
+    ownedBountyIds.has(String(submission.bountyId)),
+  );
   const visibleSubmissions = useMemo(
     () =>
-      submissions.filter(
+      scopedSubmissions.filter(
         (submission) =>
           activeFilter === "ALL" || submission.status === activeFilter,
       ),
-    [submissions, activeFilter],
+    [scopedSubmissions, activeFilter],
   );
-  const selectedSubmission = submissions.find((item) => item.id === selectedId);
+  const selectedSubmission = scopedSubmissions.find(
+    (item) => item.id === selectedId,
+  );
   const selectedBounty = bounties.find(
     (bounty) => String(bounty.id) === String(selectedSubmission?.bountyId),
   );

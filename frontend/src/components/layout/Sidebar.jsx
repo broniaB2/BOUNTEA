@@ -16,7 +16,8 @@ const navigation = [
   { label: "Submissions", path: "/submissions", icon: FileText },
 ];
 
-function Sidebar({ mobileMenu, onClose, onCreateBounty }) {
+function Sidebar({ mobileMenu, onClose, onCreateBounty, user, onLogout }) {
+  const isBusiness = user?.role === "business";
   return (
     <aside className={`sidebar ${mobileMenu ? "mobile-open" : ""}`}>
       <div className="brand">
@@ -34,7 +35,10 @@ function Sidebar({ mobileMenu, onClose, onCreateBounty }) {
 
       <div className="sidebar-section">
         <p className="sidebar-label">WORKSPACE</p>
-        {navigation.map(({ label, path, icon: Icon }) => (
+        {navigation
+          .filter(({ label }) => label !== "My Tasks" || !isBusiness)
+          .filter(({ label }) => label !== "Submissions" || isBusiness)
+          .map(({ label, path, icon: Icon }) => (
           <NavLink
             key={label}
             to={path}
@@ -50,13 +54,15 @@ function Sidebar({ mobileMenu, onClose, onCreateBounty }) {
         ))}
       </div>
 
-      <div className="sidebar-section">
-        <p className="sidebar-label">BUSINESS</p>
-        <button className="nav-link" onClick={onCreateBounty}>
-          <Plus size={19} />
-          <span>Create Bounty</span>
-        </button>
-      </div>
+      {isBusiness && (
+        <div className="sidebar-section">
+          <p className="sidebar-label">BUSINESS</p>
+          <button className="nav-link" onClick={onCreateBounty}>
+            <Plus size={19} />
+            <span>Create Bounty</span>
+          </button>
+        </div>
+      )}
 
       <div className="sidebar-bottom">
         <div className="help-card">
@@ -65,12 +71,13 @@ function Sidebar({ mobileMenu, onClose, onCreateBounty }) {
           <p>Discover opportunities and turn your skills into income.</p>
         </div>
         <div className="profile">
-          <div className="avatar">P</div>
+          <div className="avatar">{user?.name?.charAt(0).toUpperCase()}</div>
           <div>
-            <strong>Precious</strong>
-            <span>Worker Account</span>
+            <strong>{user?.name}</strong>
+            <span>{isBusiness ? "Business Account" : "Worker Account"}</span>
           </div>
         </div>
+        <button className="logout-button" onClick={onLogout}>Log out</button>
       </div>
     </aside>
   );

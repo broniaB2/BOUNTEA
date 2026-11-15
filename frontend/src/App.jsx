@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import GuestRoute from "./components/auth/GuestRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import BountyForm from "./components/bounties/BountyForm";
 import MainLayout from "./components/layout/MainLayout";
 import { emptyBountyForm } from "./data/bountyForm";
@@ -10,6 +12,8 @@ import Marketplace from "./pages/Marketplace";
 import MyTasks from "./pages/MyTasks";
 import NotFound from "./pages/NotFound";
 import Submissions from "./pages/Submissions";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import {
   createMockBounty,
   filterBounties,
@@ -22,8 +26,13 @@ import {
   approveMockSubmission,
 } from "./services/bountyService";
 import { initialSubmissions } from "./data/mockSubmissions";
+import {
+  getCurrentSession,
+  mockLogout,
+} from "./services/authService";
 
 function App() {
+  const [user, setUser] = useState(getCurrentSession);
   const [bounties, setBounties] = useState(getInitialBounties);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
@@ -38,13 +47,16 @@ function App() {
 
   function createBounty(event) {
     event.preventDefault();
-    setBounties((previous) => [createMockBounty(form), ...previous]);
+    setBounties((previous) => [
+      createMockBounty(form, user),
+      ...previous,
+    ]);
     setForm(emptyBountyForm);
     setShowModal(false);
   }
 
   function claimBounty(id) {
-    const result = claimMockBounty(bounties, id);
+    const result = claimMockBounty(bounties, id, user?.name);
     if (result.success) {
       setBounties((previous) =>
         previous.map((bounty) => (bounty.id === id ? result.bounty : bounty)),
@@ -141,60 +153,106 @@ function App() {
     onSearchChange: setSearch,
     onCategoryChange: setCategory,
     onCreateBounty: () => setShowModal(true),
+    user,
   };
 
   return (
     <BrowserRouter>
       <Routes>
         <Route
+          path="/login"
           element={
-            <MainLayout onCreateBounty={() => setShowModal(true)} />
+            <GuestRoute user={user}>
+              <Login onLogin={setUser} />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <GuestRoute user={user}>
+              <Signup onLogin={setUser} />
+            </GuestRoute>
+          }
+        />
+        <Route
+          element={
+            <ProtectedRoute user={user}>
+              <MainLayout
+                user={user}
+                onLogout={() => {
+                  mockLogout();
+                  setUser(null);
+                }}
+                onCreateBounty={() => setShowModal(true)}
+              />
+            </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Dashboard {...pageProps} />} />
-          <Route path="/marketplace" element={<Marketplace {...pageProps} />} />
+          <Route
+            path="/"
+            element={
+              <Dashboard
+                {...pageProps}
+                showBusinessActions={user?.role === "business"}
+              />
+            }
+          />
+          <Route
+            path="/marketplace"
+            element={<Marketplace {...pageProps} />}
+          />
           <Route
             path="/marketplace/:id"
             element={
               <BountyDetails
                 bounties={bounties}
                 onClaimBounty={claimBounty}
+                canClaim={user?.role === "worker"}
               />
             }
           />
           <Route
             path="/my-tasks"
             element={
-              <MyTasks
-                bounties={bounties}
-                submissions={submissions}
-                onStartTask={startTask}
-                onSubmitWork={submitWork}
-                onResubmitWork={resubmitWork}
-              />
+              <ProtectedRoute user={user} allowedRoles={["worker"]}>
+                <MyTasks
+                  bounties={bounties}
+                  submissions={submissions}
+                  worker={user?.name}
+                  onStartTask={startTask}
+                  onSubmitWork={submitWork}
+                  onResubmitWork={resubmitWork}
+                />
+              </ProtectedRoute>
             }
           />
           <Route
             path="/submissions"
             element={
-              <Submissions
-                bounties={bounties}
-                submissions={submissions}
-                onApproveSubmission={approveSubmission}
-                onRequestRevision={requestRevision}
-              />
+              <ProtectedRoute user={user} allowedRoles={["business"]}>
+                <Submissions
+                  bounties={bounties}
+                  submissions={submissions}
+                  user={user}
+                  onApproveSubmission={approveSubmission}
+                  onRequestRevision={requestRevision}
+                />
+              </ProtectedRoute>
             }
           />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
       {showModal && (
-        <BountyForm
-          form={form}
-          onChange={setForm}
-          onSubmit={createBounty}
-          onClose={() => setShowModal(false)}
-        />
+        user?.role === "business" && (
+          <BountyForm
+            form={form}
+            onChange={setForm}
+            onSubmit={createBounty}
+            onClose={() => setShowModal(false)}
+          />
+        )
       )}
     </BrowserRouter>
   );

@@ -1,7 +1,7 @@
 import { Bell, Menu } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
-function Topbar({ onOpenMenu }) {
+function Topbar({ onOpenMenu, user }) {
   const location = useLocation();
   const pageName =
     location.pathname === "/"
@@ -26,8 +26,8 @@ function Topbar({ onOpenMenu }) {
           <span className="notification-dot"></span>
         </button>
         <div className="topbar-profile">
-          <div className="avatar">P</div>
-          <span>Precious</span>
+          <div className="avatar">{user?.name?.charAt(0).toUpperCase()}</div>
+          <span>{user?.name}</span>
         </div>
       </div>
     </header>

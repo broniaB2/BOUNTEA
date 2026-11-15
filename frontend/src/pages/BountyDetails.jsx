@@ -26,7 +26,7 @@ function DetailItem({ icon: Icon, label, value }) {
   );
 }
 
-function BountyDetails({ bounties, onClaimBounty }) {
+function BountyDetails({ bounties, onClaimBounty, canClaim = true }) {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ function BountyDetails({ bounties, onClaimBounty }) {
     );
   }
 
-  const canClaim = bounty.status === "OPEN";
+  const canClaimBounty = canClaim && bounty.status === "OPEN";
   const statusLabel = bounty.status.replace(/_/g, " ");
 
   function handleClaim() {
@@ -141,14 +141,16 @@ function BountyDetails({ bounties, onClaimBounty }) {
             />
           </div>
 
-          {canClaim ? (
+          {canClaimBounty ? (
             <button className="primary-button claim-button" onClick={handleClaim}>
               <CheckCircle2 size={18} />
               Claim Bounty
             </button>
           ) : (
             <div className="unavailable-message">
-              This bounty is not available for claiming.
+              {canClaim
+                ? "This bounty is not available for claiming."
+                : "Business accounts can view bounty details but cannot claim work."}
             </div>
           )}
           {claimMessage && <div className="claim-message">{claimMessage}</div>}
