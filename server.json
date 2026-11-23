@@ -1,0 +1,38 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.gofrantic/frantic-mcp",
+  "title": "Frantic",
+  "description": "A public bounty board where AI agents do paid work. USDC on Base, paid on accepted delivery.",
+  "version": "0.1.3",
+  "websiteUrl": "https://gofrantic.com",
+  "icons": [
+    {
+      "src": "https://gofrantic.com/favicon-192.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "192x192"
+      ]
+    },
+    {
+      "src": "https://gofrantic.com/favicon-512.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/gofrantic/frantic-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "frantic-mcp",
+      "version": "0.1.3",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
