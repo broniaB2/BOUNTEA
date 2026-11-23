@@ -78,7 +78,7 @@ function BountyDetails({ bounties, onClaimBounty, canClaim = true }) {
               <span className="category-tag">{bounty.category}</span>
               <h1>{bounty.title}</h1>
               <div className="details-business">
-                <div className="business-avatar">{bounty.business.charAt(0)}</div>
+                <div className="business-avatar">{(bounty.business || "?").charAt(0)}</div>
                 <span>{bounty.business}</span>
               </div>
             </div>
@@ -102,7 +102,7 @@ function BountyDetails({ bounties, onClaimBounty, canClaim = true }) {
           <section className="details-section">
             <h2>Required skills</h2>
             <div className="skill-list">
-              {bounty.skills?.map((skill) => (
+              {(bounty.skills || []).map((skill) => (
                 <span key={skill}>{skill}</span>
               ))}
             </div>

@@ -28,12 +28,18 @@ function SubmissionDetails({
   submission,
   bounty,
   onApprove,
+  onApproveAndPay,
+  spendingCap,
   onRequestRevision,
   onClose,
 }) {
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
+  const [paymentResult, setPaymentResult] = useState(null);
+  const [paying, setPaying] = useState(false);
   const canReview = submission.status === "SUBMITTED";
+  const withinCap =
+    !spendingCap || Number(bounty?.reward || submission.reward || 0) <= spendingCap;
 
   function handleRevision(event) {
     event.preventDefault();
@@ -46,10 +52,28 @@ function SubmissionDetails({
     setError("");
   }
 
-  function handleApproval() {
-    const result = onApprove(submission.id);
-    if (!result.success) {
-      setError(result.error);
+  async function handleApproval() {
+    if (!withinCap) {
+      setError(`Reward exceeds spending cap of ${spendingCap} USDC.`);
+      return;
+    }
+    setError("");
+    setPaying(true);
+    setPaymentResult(null);
+    try {
+      if (onApproveAndPay) {
+        const result = await onApproveAndPay(submission.id);
+        if (!result || !result.success) {
+          setError((result && result.error) || "Payment failed");
+          return;
+        }
+        setPaymentResult(result.receipt || result);
+      } else {
+        const result = onApprove(submission.id);
+        if (!result.success) setError(result.error);
+      }
+    } finally {
+      setPaying(false);
     }
   }
 
@@ -120,9 +144,22 @@ function SubmissionDetails({
       </div>
       {canReview && (
         <div className="review-actions">
-          <button className="primary-button" onClick={handleApproval}>
+          <div className="cap-check">
+            <strong>Client agent cap check</strong>
+            <span className={withinCap ? "cap-ok" : "cap-bad"}>
+              Reward ${Number(bounty?.reward || submission.reward || 0).toFixed(2)} USDC
+              {withinCap
+                ? ` ≤ cap ${spendingCap} USDC — approved to pay`
+                : ` exceeds cap ${spendingCap} USDC`}
+            </span>
+          </div>
+          <button
+            className="primary-button"
+            onClick={handleApproval}
+            disabled={paying || !withinCap}
+          >
             <CheckCircle2 size={17} />
-            Approve Submission
+            {paying ? "Settling via x402…" : "Approve & Pay via x402"}
           </button>
           <form onSubmit={handleRevision} className="revision-form">
             <label htmlFor={`feedback-${submission.id}`}>Revision feedback</label>
@@ -143,7 +180,26 @@ function SubmissionDetails({
           </form>
         </div>
       )}
-      {submission.status === "APPROVED" && (
+      {paymentResult && paymentResult.txHash && (
+        <div className="payment-receipt">
+          <div className="payment-receipt-header">
+            <CheckCircle2 size={18} />
+            <strong>Paid on Stellar Testnet via x402</strong>
+          </div>
+          <div className="payment-receipt-body">
+            <span>Transaction hash</span>
+            <code>{paymentResult.txHash}</code>
+            <a
+              href={`https://stellar.expert/explorer/testnet/tx/${paymentResult.txHash}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View on Stellar Explorer <ExternalLink size={13} />
+            </a>
+          </div>
+        </div>
+      )}
+      {submission.status === "APPROVED" && !paymentResult && (
         <div className="approval-notice">
           Work approved — awaiting payment. Payment confirmation will appear after
           backend verification.
@@ -158,7 +214,9 @@ function Submissions({
   bounties,
   submissions,
   user,
+  spendingCap,
   onApproveSubmission,
+  onApproveAndPay,
   onRequestRevision,
 }) {
   const [activeFilter, setActiveFilter] = useState("ALL");
@@ -166,7 +224,10 @@ function Submissions({
   const [notice, setNotice] = useState("");
   const ownedBountyIds = new Set(
     bounties
-      .filter((bounty) => bounty.createdBy === user?.email)
+      .filter(
+        (bounty) =>
+          bounty.createdBy === user?.email || bounty.business === user?.name,
+      )
       .map((bounty) => String(bounty.id)),
   );
   const scopedSubmissions = submissions.filter((submission) =>
@@ -278,7 +339,9 @@ function Submissions({
         <SubmissionDetails
           submission={selectedSubmission}
           bounty={selectedBounty}
+          spendingCap={spendingCap}
           onApprove={handleApprove}
+          onApproveAndPay={onApproveAndPay}
           onRequestRevision={handleRevision}
           onClose={() => setSelectedId(null)}
         />

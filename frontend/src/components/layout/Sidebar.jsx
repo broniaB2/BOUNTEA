@@ -4,6 +4,7 @@ import {
   FileText,
   LayoutDashboard,
   Plus,
+  Receipt,
   Sparkles,
   X,
 } from "lucide-react";
@@ -14,6 +15,7 @@ const navigation = [
   { label: "Marketplace", path: "/marketplace", icon: Compass },
   { label: "My Tasks", path: "/my-tasks", icon: BriefcaseBusiness },
   { label: "Submissions", path: "/submissions", icon: FileText },
+  { label: "Receipts", path: "/receipts", icon: Receipt },
 ];
 
 function Sidebar({ mobileMenu, onClose, onCreateBounty, user, onLogout }) {

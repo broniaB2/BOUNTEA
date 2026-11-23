@@ -23,12 +23,12 @@ function BountyCard({ bounty }) {
       <h3>{bounty.title}</h3>
       <p className="bounty-description">{bounty.description}</p>
       <div className="skill-list">
-        {bounty.skills.map((skill) => (
+        {(bounty.skills || []).map((skill) => (
           <span key={skill}>{skill}</span>
         ))}
       </div>
       <div className="bounty-business">
-        <div className="business-avatar">{bounty.business.charAt(0)}</div>
+        <div className="business-avatar">{(bounty.business || "?").charAt(0)}</div>
         <span>{bounty.business}</span>
       </div>
       <div className="bounty-footer">

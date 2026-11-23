@@ -85,7 +85,7 @@ function Login({ onLogin }) {
           <button type="submit" className="primary-button auth-submit">Log in</button>
         </form>
         <p className="auth-switch">New to BOUNTEA? <Link to="/signup">Create an account</Link></p>
-        <p className="mock-auth-note">Development demo authentication only. Your password is never stored in browser storage.</p>
+        <p className="mock-auth-note">Development demo authentication only. Accounts and passwords are stored in this browser so you can log back in after a refresh.</p>
       </main>
     </div>
   );

@@ -13,6 +13,7 @@ function BountyForm({ form, onChange, onSubmit, onClose }) {
             <p>Publish a new opportunity on BOUNTEA.</p>
           </div>
           <button
+            type="button"
             className="icon-button"
             onClick={onClose}
             aria-label="Close create bounty form"

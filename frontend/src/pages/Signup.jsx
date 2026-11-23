@@ -98,7 +98,7 @@ function Signup({ onLogin }) {
           <button type="submit" className="primary-button auth-submit">Create account</button>
         </form>
         <p className="auth-switch">Already have an account? <Link to="/login">Log in</Link></p>
-        <p className="mock-auth-note">Development demo authentication only. Connect this form to the backend registration flow later.</p>
+        <p className="mock-auth-note">Development demo authentication only. Your account is saved in this browser so you can log back in after a refresh.</p>
       </main>
     </div>
   );

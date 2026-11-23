@@ -294,7 +294,22 @@ function MyTasks({
                   <span className="task-awaiting">Awaiting client review</span>
                 )}
                 {task.status === "COMPLETED" && (
-                  <span className="task-completed">Completed</span>
+                  <div className="task-completed-block">
+                    <span className="task-completed">Completed</span>
+                    {task.txHash && (
+                      <a
+                        className="view-receipt-link"
+                        href={`https://stellar.expert/explorer/testnet/tx/${task.txHash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        View on-chain receipt
+                      </a>
+                    )}
+                    <a className="view-receipt-link" href="/receipts">
+                      Open Receipts
+                    </a>
+                  </div>
                 )}
               </div>
               {submissionTaskId === task.id && (

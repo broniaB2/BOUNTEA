@@ -73,6 +73,7 @@ function Dashboard({
   search,
   category,
   categories,
+  submissions,
   onSearchChange,
   onCategoryChange,
   onCreateBounty,
@@ -80,22 +81,44 @@ function Dashboard({
   showBusinessActions,
 }) {
   const isBusiness = user?.role === "business";
-  const visibleBounties = isBusiness
-    ? bounties.filter((bounty) => bounty.createdBy === user.email)
-    : bounties;
+
+  // A bounty belongs to a business if created by them (email) OR posted under their name.
+  const ownsBounty = (bounty) =>
+    bounty.createdBy === user?.email || bounty.business === user?.name;
+
+  const ownBounties = isBusiness ? bounties.filter(ownsBounty) : [];
+  const openBounties = bounties.filter((bounty) => bounty.status === "OPEN");
   const claimedBounties = bounties.filter(
     (bounty) => bounty.claimedBy === user?.name,
+  );
+  const completedClaimed = claimedBounties.filter(
+    (bounty) => bounty.status === "COMPLETED",
+  );
+  const totalEarnings = completedClaimed.reduce(
+    (sum, bounty) => sum + Number(bounty.reward || 0),
+    0,
+  );
+  const totalSpending = ownBounties
+    .filter((bounty) => bounty.status === "COMPLETED")
+    .reduce((sum, bounty) => sum + Number(bounty.reward || 0), 0);
+
+  const ownedBountyIds = new Set(ownBounties.map((b) => String(b.id)));
+  const submissionsReceived = (submissions || []).filter((submission) =>
+    ownedBountyIds.has(String(submission.bountyId)),
   );
 
   return (
     <div className="page-content">
       <div className="welcome-row">
         <div>
-          <p className="eyebrow">YOUR OPPORTUNITY STARTS HERE</p>
-          <h1>Explore opportunities</h1>
+          <p className="eyebrow">
+            {isBusiness ? "YOUR BUSINESS HUB" : "YOUR OPPORTUNITY STARTS HERE"}
+          </p>
+          <h1>{isBusiness ? "Manage your bounties" : "Explore opportunities"}</h1>
           <p className="page-description">
-            Discover meaningful work, complete tasks and earn through
-            autonomous payments on Stellar.
+            {isBusiness
+              ? "Track the bounties you posted, review submissions and monitor your spending."
+              : "Discover meaningful work, complete tasks and earn through autonomous payments on Stellar."}
           </p>
         </div>
         {showBusinessActions && (
@@ -110,34 +133,34 @@ function Dashboard({
         <StatCard
           icon={Compass}
           tone="purple"
-          label="Available bounties"
-          value={visibleBounties.length}
-          description="Opportunities to explore"
+          label={isBusiness ? "Your bounties" : "Available bounties"}
+          value={isBusiness ? ownBounties.length : openBounties.length}
+          description={isBusiness ? "Bounties you posted" : "Opportunities to explore"}
         />
         <StatCard
           icon={BriefcaseBusiness}
           tone="blue"
-          label="Active tasks"
-          value={claimedBounties.filter(
-            (bounty) => bounty.status === "IN_PROGRESS",
-          ).length}
+          label={isBusiness ? "Active (claimed)" : "Active tasks"}
+          value={
+            isBusiness
+              ? ownBounties.filter((b) => b.status === "CLAIMED" || b.status === "IN_PROGRESS" || b.status === "SUBMITTED").length
+              : claimedBounties.filter((bounty) => bounty.status === "IN_PROGRESS").length
+          }
           description="Your ongoing work"
         />
         <StatCard
           icon={Wallet}
           tone="green"
-          label="Total earnings"
-          value="0.00"
-          description="USDC earned"
+          label={isBusiness ? "Total spending" : "Total earnings"}
+          value={(isBusiness ? totalSpending : totalEarnings).toFixed(2)}
+          description={isBusiness ? "USDC spent on completed tasks" : "USDC earned"}
         />
         <StatCard
           icon={CheckCircle2}
           tone="orange"
-          label="Completed tasks"
-          value={claimedBounties.filter(
-            (bounty) => bounty.status === "COMPLETED",
-          ).length}
-          description="Successfully completed"
+          label={isBusiness ? "Submissions received" : "Completed tasks"}
+          value={isBusiness ? submissionsReceived.length : completedClaimed.length}
+          description={isBusiness ? "Work awaiting or completed review" : "Successfully completed"}
         />
       </section>
 
@@ -145,7 +168,7 @@ function Dashboard({
       <BountyExplorer
         bounties={
           isBusiness
-            ? filteredBounties.filter((bounty) => bounty.createdBy === user.email)
+            ? filteredBounties.filter(ownsBounty)
             : filteredBounties
         }
         search={search}

@@ -1,10 +1,50 @@
 const SESSION_KEY = "bountea.mock.session";
+const USERS_KEY = "bountea.mock.users";
 
 const mockUsers = new Map();
 
 function normalizeEmail(email) {
   return email.trim().toLowerCase();
 }
+
+function persistUsers() {
+  try {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(
+      USERS_KEY,
+      JSON.stringify(Array.from(mockUsers.values())),
+    );
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.).
+  }
+}
+
+function loadUsers() {
+  try {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const storedUsers = window.localStorage.getItem(USERS_KEY);
+    if (!storedUsers) {
+      return;
+    }
+    const parsed = JSON.parse(storedUsers);
+    if (!Array.isArray(parsed)) {
+      return;
+    }
+    parsed.forEach((user) => {
+      if (user && user.email) {
+        mockUsers.set(normalizeEmail(user.email), user);
+      }
+    });
+  } catch {
+    // Ignore corrupt storage and start fresh.
+  }
+}
+
+loadUsers();
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -56,6 +96,7 @@ export function mockSignUp({ name, email, password, role }) {
     role,
   };
   mockUsers.set(normalizedEmail, user);
+  persistUsers();
 
   return { success: true, profile: saveSession(toProfile(user)) };
 }
